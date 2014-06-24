@@ -14,8 +14,10 @@ class TestEmailsController extends EmailController {
 	 */
 	public function send() {
 		return array(
-		 	'toEmail' => $this->_data['Notification']['email_to'],
-			'subject' => $this->_data['Notification']['subject'],
+		 	'toEmail' => $this->_data['email_to'],
+			'ccEmail' => $this->_data['email_cc'],
+			'bccEmail' => $this->_data['email_bcc'],
+			'subject' => $this->_data['subject'],
 			'message' => $this->_body,
 		);
 	}
@@ -52,6 +54,10 @@ class EmailsAppControllerTest extends ControllerTestCase {
 		$notification = $this->Emails->Notification->findById('5077241d-9040-43c9-85b1-22d40000000');
 		//check to
 		$this->assertEqual($result['toEmail'], $notification['Notification']['email_to']);
+		//check cc
+		$this->assertEqual($result['ccEmail'], $notification['Notification']['email_cc']);
+		//check bcc
+		$this->assertEqual($result['bccEmail'], $notification['Notification']['email_bcc']);
 		//check subject
 		$this->assertEqual($result['subject'], $notification['Notification']['subject']);
 		//check template rendered properly

@@ -24,6 +24,8 @@ class NotificationFixture extends CakeTestFixture {
 			'event_name' => 'Model.User.created',
 			'subject' => 'NewUser',
 			'email_to' => 'test@example.com',
+			'email_cc' => 'textcc@example.com',
+			'email_bcc' => 'testbcc@example.com',
 			'email_from' => 'from@example.com',
 			'template' => '',
 			'enabled' => true,

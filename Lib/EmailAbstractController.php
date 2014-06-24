@@ -23,7 +23,9 @@ class EmailAbstractController extends AppController {
 	
 	protected $_eventName = ""; //holder for the event name
 	
-	protected $_event = false; //holder for the Event
+	protected $_event = false; //holder for the called event data
+	
+	protected $__Alldata = false; //holder for all notification data
 	
 	protected $_data = false; //holder for notification data;
 	
@@ -51,16 +53,25 @@ class EmailAbstractController extends AppController {
 	 */
 	
 	public function __call($name, $arguments) {
-		$name = "_send".$name;
-		if(method_exists($this, $name)) {
+		$callname = "_send".$name;
+		if(method_exists($this, $callname)) {
 			//call init function to setup needed data
 			if(!$this->_init()) {
-				debug('here');exit;
 				return false;
 			}
-			$this->$name($arguments[0]);
-			$this->_body = $this->render();
-			return $this->send();
+			foreach ($this->_Alldata as $data) {
+				$this->_data = $data['Notification'];
+				if(!empty($this->_data['template'])) {
+					$this->view = $this->_data['template'];
+				}else {
+					$this->view = Inflector::underscore($name);
+				}
+				$this->$callname($arguments[0]);
+				$this->_body = $this->render();
+				$return = $this->send();
+			}
+			return $return;
+				
 		}else {
 			return false;
 		}
@@ -73,9 +84,9 @@ class EmailAbstractController extends AppController {
 	 */
 	
 	public function _init() {
-		$this->_data = $this->Notification->find('first', array('event_name' => $this->_eventName));
+		$this->_Alldata = $this->Notification->find('all', array('conditions' => array('event_name' => $this->_eventName)));
 		//No data defined just return false
-		if($this->_data === false) {
+		if($this->_Alldata === false) {
 			return false;
 		}
 		return true;
@@ -117,8 +128,8 @@ class EmailAbstractController extends AppController {
 	 * @see AppController::__sendMail
 	 */
 	private function _send() {
-		$toEmail = $this->_data['Notification']['email_to'];
-		$subject = $this->_data['Notification']['subject'];
+		$toEmail = $this->_data['email_to'];
+		$subject = $this->_data['subject'];
 		$message = $this->_body;
 		$this->__sendMail($toEmail, $subject, $message, $template = 'default', $from = array(), $attachment = array());		
 	}

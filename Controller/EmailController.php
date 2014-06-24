@@ -19,13 +19,10 @@ App::uses('EmailAbstractController', 'Notifications.Lib');
 class EmailController extends EmailAbstractController {
 	
 	protected function _sendOrderCompleteEmail($order) {
-		$this->view = "order_complete_email";
-		$this->set('order', $order);
-		
+		$this->set('order', $data[$data['Model']->alias]);
 	}
 	
 	protected function _sendUserRegisterEmail($data) {
-		$this->view = "user_registration_email"; 
 		$this->set('user', $data[$data['Model']->alias]);
 	}
 	
