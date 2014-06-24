@@ -1,13 +1,27 @@
 <?php
 App::uses('CakeEventListener', 'Event');
-App::uses('EmailsController', 'Notifications.Controller');
 
 class NotificationsEvents implements CakeEventListener {
 	
 	private $_controller; //Holder for Controller Class
 	
-	public function __construct() {
-		$this->_controller = new EmailsController();
+	
+	/**
+	 * Construct Method
+	 * @param array $options
+	 * 
+	 * Options = array(
+	 * 		controller => "[PluginName].[ControllerClassName]"
+	 * )
+	 * 
+	 */
+	public function __construct($options = array()) {
+		if(!isset($options['controller'])) {
+			$options['controller'] = "Notifications.EmailsAppController";
+		}
+		$split = explode(".", $options['controller']);
+		App::uses($split[1], "{$split[0]}.Controller");
+		$this->_controller = new $split[1]();
 	}
 	
 	
@@ -28,18 +42,29 @@ class NotificationsEvents implements CakeEventListener {
 		return 
 			array(
 				'Model.Transaction.complete' => array(
-	                'callable' => 'sendOrderCompleteEmail',
+	                'callable' => 'OrderCompleteEmail',
 	                'passParams' => true
             	),
+				'Model.User.created' => array(
+						'callable' => 'UserRegisterEmail',
+						'passParams' => true
+				),
 			);
 	}
 
  	public function __call($name, $arguments) {
         //Call the method on the bound controller
-        if(method_exists($this->_controller, $name)) {
-        	call_user_method_array($name, $this->_controller, $arguments);
-        }else {
-        	throw new Exception("{$name} method does not exist on {$this->_conroller->name}");
-        }
+        $this->_controller->_event = $this;
+        $this->_controller->_eventName = $this->_getEventName($name);
+        $this->_controller->$name($arguments);
+    }
+    
+    private function _getEventName($name) {
+    	$events = $this->implementedEvents();
+    	foreach ($events as $called => $event) {
+    		if($event['callable'] === $name) {
+    			return $called;
+    		}
+    	}
     }
 }
