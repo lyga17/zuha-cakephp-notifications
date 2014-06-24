@@ -1,8 +1,8 @@
 <?php
-App::uses('EmailsAppController', 'Notifications.Controller');
+App::uses('EmailController', 'Notifications.Controller');
 App::uses("CakeResponse", "Cake.Network");
 
-class TestEmailsController extends EmailsAppController {
+class TestEmailsController extends EmailController {
 	
 	
 	public function redirect($url, $status=null, $exit=true) {
@@ -12,7 +12,7 @@ class TestEmailsController extends EmailsAppController {
 	/**
 	 * Returns a send array for testing
 	 */
-	protected function _send() {
+	public function send() {
 		return array(
 		 	'toEmail' => $this->_data['Notification']['email_to'],
 			'subject' => $this->_data['Notification']['subject'],

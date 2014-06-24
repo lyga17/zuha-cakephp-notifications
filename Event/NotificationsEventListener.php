@@ -1,28 +1,25 @@
 <?php
 App::uses('CakeEventListener', 'Event');
 
+
+/**
+ * Notifications Event Listener
+ * 
+ * Listens for events for email notifications
+ * Called and passes params to email controller.
+ * 
+ * if you set event['controller'] = "[Plugin].[Controller]"
+ * this will init and pass the data to that controller.
+ * controller mush implement EmailsControllerAbstract
+ * 
+ * @author Nick Lyga
+ *
+ */
+
+
 class NotificationsEvents implements CakeEventListener {
 	
 	private $_controller; //Holder for Controller Class
-	
-	
-	/**
-	 * Construct Method
-	 * @param array $options
-	 * 
-	 * Options = array(
-	 * 		controller => "[PluginName].[ControllerClassName]"
-	 * )
-	 * 
-	 */
-	public function __construct($options = array()) {
-		if(!isset($options['controller'])) {
-			$options['controller'] = "Notifications.EmailsAppController";
-		}
-		$split = explode(".", $options['controller']);
-		App::uses($split[1], "{$split[0]}.Controller");
-		$this->_controller = new $split[1]();
-	}
 	
 	
 	/**
@@ -53,10 +50,23 @@ class NotificationsEvents implements CakeEventListener {
 	}
 
  	public function __call($name, $arguments) {
+ 		//Bind Controller
+ 		$arguments = $this->_bindController($arguments);
         //Call the method on the bound controller
         $this->_controller->_event = $this;
         $this->_controller->_eventName = $this->_getEventName($name);
         $this->_controller->$name($arguments);
+    }
+    
+    private function _bindController($arguments) {
+    	if(!isset($arguments[0]['controller'])) {
+    		$arguments[0]['controller'] = "Notifications.EmailsAppController";
+    	}
+    	$split = explode(".", $options['controller']);
+    	App::uses($split[1], "{$split[0]}.Controller");
+    	$this->_controller = new $split[1]();
+    	unset($arguments[0]['controller']);
+    	return $arguments;
     }
     
     private function _getEventName($name) {

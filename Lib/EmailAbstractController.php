@@ -14,13 +14,11 @@ App::uses('AppController', 'Notifications.Controller');
  *
  */
 
-class EmailsAppController extends AppController {
+class EmailAbstractController extends AppController {
 	
 	public $viewClass = 'TwigView.TwigEmail';
 	public $view = false;
-	
-	public $uses = array('Notifications.Notification');
-	
+		
 	public $ext = ".tpl";
 	
 	protected $_eventName = ""; //holder for the event name
@@ -30,6 +28,16 @@ class EmailsAppController extends AppController {
 	protected $_data = false; //holder for notification data;
 	
 	protected $_body = ""; //Holder for the message body
+	
+	
+	
+	public function __construct($request = null, $response = null) {
+		parent::__construct($request, $response);
+		//This is because it always needed, and it shouldn't be overridable
+		$this->loadModel('Notifications.Notification');
+	}
+	
+	
 	
 	/**
 	 * Overloading the method calls to provide callbacks on
@@ -46,41 +54,32 @@ class EmailsAppController extends AppController {
 		$name = "_send".$name;
 		if(method_exists($this, $name)) {
 			//call init function to setup needed data
-			$this->_init();
+			if(!$this->_init()) {
+				debug('here');exit;
+				return false;
+			}
 			$this->$name($arguments[0]);
 			$this->_body = $this->render();
-			return $this->_send();
+			return $this->send();
 		}else {
 			return false;
 		}
 	}
 	
 	/**
-	 * Init Method, sets up notification this gets called before
-	 * and event methods.
+	 * Init Method, sets up notification this gets called before event methods.
 	 *
 	 * @throws Exception
 	 */
 	
 	public function _init() {
 		$this->_data = $this->Notification->find('first', array('event_name' => $this->_eventName));
-		if(!$this->_data) {
-			throw new Exception("Notification not defined");
+		//No data defined just return false
+		if($this->_data === false) {
+			return false;
 		}
+		return true;
 	}
-	
-	protected function _sendOrderCompleteEmail($order) {
-		$this->view = "order_complete_email";
-		$this->set('order', $order);
-		
-	}
-	
-	protected function _sendUserRegisterEmail($data) {
-		$this->view = "user_registration_email"; 
-		$this->set('user', $data[$data['Model']->alias]);
-	}
-	
-	
 	
 	
 	/**
@@ -104,14 +103,20 @@ class EmailsAppController extends AppController {
 		return file_get_contents(ROOT.DS.APP_DIR.DS."Plugin".DS."Notifications".DS."View".DS."Emails".DS.$filename.".tpl");
 	}
 	
+	/**
+	 * Exposes send method
+	 */
+	public function send() {
+		$this->_send();
+	}
+	
 	
 	/**
 	 * _send Method uses AppController __sendMail()
 	 * 
 	 * @see AppController::__sendMail
 	 */
-	protected function _send() {
-		debug($this->_data);exit;
+	private function _send() {
 		$toEmail = $this->_data['Notification']['email_to'];
 		$subject = $this->_data['Notification']['subject'];
 		$message = $this->_body;

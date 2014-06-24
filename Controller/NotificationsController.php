@@ -5,7 +5,8 @@ class NotificationsController extends NotificationsAppController {
 	
 	public $uses = array('Notifications.Notification');
 	
-	public function notifications() {
+	public function dashboard() {
+		$this->redirect('admin');
 		App::uses('NotificationsEvents', 'Notification.Event');
 		$Notifications = new NotificationsEvents();
 		$events = array();
@@ -17,6 +18,7 @@ class NotificationsController extends NotificationsAppController {
 	}
 	
 	public function edit_notification($name) {
+		$this->redirect('admin');
 		$this->set('event_name', $name);
 		
 		if($this->request->is('get')) {
