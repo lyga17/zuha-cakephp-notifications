@@ -18,12 +18,12 @@ App::uses('EmailAbstractController', 'Notifications.Lib');
 
 class EmailController extends EmailAbstractController {
 	
-	protected function _sendOrderCompleteEmail($order) {
+	protected function _sendOrderCompleteEmail($Model, $data, $options = array()) {
 		$this->set('order', $data[$data['Model']->alias]);
 	}
 	
-	protected function _sendUserRegisterEmail($data) {
-		$this->set('user', $data[$data['Model']->alias]);
+	protected function _sendUserRegisterEmail($Model, $data, $options = array()) {
+		$this->set('User', $data[$Model->alias]);
 	}
 	
 }

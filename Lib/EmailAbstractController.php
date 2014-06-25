@@ -66,7 +66,8 @@ class EmailAbstractController extends AppController {
 				}else {
 					$this->view = Inflector::underscore($name);
 				}
-				$this->$callname($arguments[0]);
+				$arguments[2] = isset($arguments[2]) ? $arguments[2] : array();
+				$this->$callname($arguments[0], $arguments[1], $arguments[2]);
 				$this->_body = $this->render();
 				$return = $this->send();
 			}
@@ -111,15 +112,11 @@ class EmailAbstractController extends AppController {
 		if($layout === null) {
 			$layout = isset($this->layout) ? $this->layout : "default";
 		}
-		if($this->view === $this->_data['template']) {
-			return $this->View->renderString();
+		if($view === $this->_data['template']) {
+			return $this->View->renderString($view);
 		}
 		
 		return $this->View->renderHtml();
-	}
-	
-	protected function _getTemplateFromFile($filename) {
-		return file_get_contents(ROOT.DS.APP_DIR.DS."Plugin".DS."Notifications".DS."View".DS."Emails".DS.$filename.".tpl");
 	}
 	
 	/**

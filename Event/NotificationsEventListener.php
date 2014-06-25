@@ -55,17 +55,18 @@ class NotificationsEvents implements CakeEventListener {
         //Call the method on the bound controller
         $this->_controller->_event = $this;
         $this->_controller->_eventName = $this->_getEventName($name);
-        $this->_controller->$name($arguments);
+        $this->_controller->$name($arguments[0], $arguments[1], $arguments[3]);
     }
     
     private function _bindController($arguments) {
-    	if(!isset($arguments[0]['controller'])) {
-    		$arguments[0]['controller'] = "Notifications.EmailsAppController";
+    	if(!isset($arguments[3]['controller'])) {
+    		$options['controller'] = "Notifications.EmailController";
+    	}else {
+    		$options['controller'] = $arguments[3]['controller'];
     	}
     	$split = explode(".", $options['controller']);
     	App::uses($split[1], "{$split[0]}.Controller");
     	$this->_controller = new $split[1]();
-    	unset($arguments[0]['controller']);
     	return $arguments;
     }
     
