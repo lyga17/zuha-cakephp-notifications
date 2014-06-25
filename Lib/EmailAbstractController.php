@@ -84,7 +84,11 @@ class EmailAbstractController extends AppController {
 	 */
 	
 	public function _init() {
-		$this->_Alldata = $this->Notification->find('all', array('conditions' => array('event_name' => $this->_eventName)));
+		$this->_Alldata = $this->Notification->find('all', array(
+				'conditions' => array(
+					'event_name' => $this->_eventName,
+					'enabled' => true
+				)));
 		//No data defined just return false
 		if($this->_Alldata === false) {
 			return false;
@@ -107,6 +111,10 @@ class EmailAbstractController extends AppController {
 		if($layout === null) {
 			$layout = isset($this->layout) ? $this->layout : "default";
 		}
+		if($this->view === $this->_data['template']) {
+			return $this->View->renderString();
+		}
+		
 		return $this->View->renderHtml();
 	}
 	
